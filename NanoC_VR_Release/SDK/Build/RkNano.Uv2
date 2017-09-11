@@ -1,0 +1,212 @@
+### uVision2 Project, (C) Keil Software
+### Do not modify !
+
+Target (RkNano), 0x0004 // Tools: 'ARM-ADS'
+
+Group (Boot)
+Group (Driver)
+Group (System)
+Group (OsLib)
+Group (FileSys)
+Group (App)
+Group (AudioControl)
+Group (EqLib)
+Group (USB)
+Group (MemDev)
+Group (UsbAudio)
+Group (RkVrLib)
+Group (EDID)
+
+File 1,1,<..\..\Common\BootLoader\microlibuse.c><microlibuse.c>
+File 1,1,<..\..\Common\BootLoader\Dumy.c><Dumy.c>
+File 1,2,<..\..\Common\BootLoader\Start.s><Start.s>
+File 1,1,<..\Scatter\ScatterLoader.c><ScatterLoader.c>
+File 2,1,<..\..\Common\Driver\PLL\Pll.c><Pll.c>
+File 2,1,<..\..\Common\Driver\SCU\scu.c><scu.c>
+File 2,1,<..\..\Common\Driver\PMU\PMU.C><PMU.C>
+File 2,1,<..\..\Common\Driver\ADC\Adc.c><Adc.c>
+File 2,1,<..\..\Common\Driver\DMA\Dma.c><Dma.c>
+File 2,1,<..\..\Common\Driver\I2C\i2c.c><i2c.c>
+File 2,1,<..\..\Common\Driver\IIS\I2s.c><I2s.c>
+File 2,1,<..\..\Common\Driver\PWM\pwm.c><pwm.c>
+File 2,1,<..\..\Common\Driver\GPIO\gpio.c><gpio.c>
+File 2,1,<..\..\Common\Driver\SPI\Spi.c><Spi.c>
+File 2,1,<..\..\Common\Driver\SYSTICK\systick.c><systick.c>
+File 2,1,<..\..\Common\Driver\TIMER\timer.c><timer.c>
+File 2,1,<..\..\Common\Driver\AD_KEY\AD_Key.c><AD_Key.c>
+File 2,1,<..\..\Common\Driver\UART\uart.c><uart.c>
+File 2,1,<..\..\Common\Driver\DAC\rockcodec\rockcodec.c><rockcodec.c>
+File 2,1,<..\..\Common\Driver\Sesnor\MPU6500.c><MPU6500.c>
+File 2,1,<..\..\Common\Driver\TC358870XBG\tc358870xbg.c><tc358870xbg.c>
+File 2,1,<..\..\Common\Driver\FUSB302\FUSB302.c><FUSB302.c>
+File 2,1,<..\..\Common\Driver\TC358860XBG\tc358860xbgAUO2P1-60fps.c><tc358860xbgAUO2P1-60fps.c>
+File 2,1,<..\..\Common\Driver\TC358860XBG\tc358860xbgAUO3P81-75fps.c><tc358860xbgAUO3P81-75fps.c>
+File 2,1,<..\..\Common\Driver\TC358860XBG\tc358860xbgRAYKEN5P46-60fps.c><tc358860xbgRAYKEN5P46-60fps.c>
+File 2,1,<..\..\Common\Driver\touch\gslx680.c><gslx680.c>
+File 2,1,<..\..\Common\Driver\touch\gsl_point_id.c><gsl_point_id.c>
+File 2,1,<..\..\Common\Driver\TC358860XBG\tc358860xbgSHARP2P89-75fps.c><tc358860xbgSHARP2P89-75fps.c>
+File 3,1,<..\..\Common\System\Debug\Debug.c><Debug.c>
+File 3,1,<..\main.c><main.c>
+File 3,1,<..\..\Common\System\SysService\Hook.c><Hook.c>
+File 3,1,<..\..\Common\System\SysService\Delay.c><Delay.c>
+File 3,1,<..\..\Common\System\SysService\Backlight.c><Backlight.c>
+File 3,1,<..\..\Common\System\SysService\battery.c><battery.c>
+File 3,1,<..\..\Common\System\SysService\Service.c><Service.c>
+File 3,1,<..\..\Common\System\Os\interrupt.c><interrupt.c>
+File 3,1,<..\..\Common\System\FileSeek\SysFindFile.c><SysFindFile.c>
+File 3,1,<..\..\Common\System\Os\SysTickHandler.c><SysTickHandler.c>
+File 3,1,<..\..\Common\System\SysService\UsbAdapterProbe.c><UsbAdapterProbe.c>
+File 4,1,<..\..\Common\System\Os\Msg.c><Msg.c>
+File 4,1,<..\..\Common\System\Os\Win.c><Win.c>
+File 4,1,<..\..\Common\System\Os\Thread.c><Thread.c>
+File 4,1,<..\..\Common\System\Os\Task.c><Task.c>
+File 4,1,<..\..\Common\System\Os\OsHook.c><OsHook.c>
+File 4,1,<..\..\Common\System\ModuleOverlay\ModuleOverlay.c><ModuleOverlay.c>
+File 4,1,<..\..\Common\System\ModuleOverlay\SysReservedOperation.c><SysReservedOperation.c>
+File 5,1,<..\..\Common\FileSys\Decode.c><Decode.c>
+File 5,1,<..\..\Common\FileSys\nFAT.c><nFAT.c>
+File 5,1,<..\..\Common\FileSys\fat.c><fat.c>
+File 5,1,<..\..\Common\FileSys\FDT.c><FDT.c>
+File 5,1,<..\..\Common\FileSys\dir.c><dir.c>
+File 5,1,<..\..\Common\FileSys\file.c><file.c>
+File 5,1,<..\..\Common\FileSys\FileSeek.c><FileSeek.c>
+File 6,1,<..\UI\dialog\DialogBox.c><DialogBox.c>
+File 6,1,<..\UI\dialog\MessageBox.c><MessageBox.c>
+File 6,1,<..\UI\dialog\LowPower.c><LowPower.c>
+File 6,1,<..\UI\dialog\Hold.c><Hold.c>
+File 6,1,<..\UI\dialog\PowerOn_Off.c><PowerOn_Off.c>
+File 6,1,<..\UI\MainMenu\MainMenu.c><MainMenu.c>
+File 6,1,<..\UI\MainMenu\MainMenuInterface.c><MainMenuInterface.c>
+File 6,1,<..\UI\USB\FunUSB.c><FunUSB.c>
+File 6,1,<..\UI\CharegeWin\ChargeWin.c><ChargeWin.c>
+File 6,1,<..\UI\MusicWin\MusicLrc.c><MusicLrc.c>
+File 6,1,<..\UI\MusicWin\MusicWin.c><MusicWin.c>
+File 6,1,<..\UI\MusicWin\MusicWinInterface.c><MusicWinInterface.c>
+File 7,1,<..\..\Common\Codec\Audio\AudioControl\AudioControl.c><AudioControl.c>
+File 7,1,<..\..\Common\Codec\Audio\AudioControl\HoldonPlay.c><HoldonPlay.c>
+File 7,1,<..\..\Common\Codec\Audio\Common\audio_file_access.c><audio_file_access.c>
+File 7,1,<..\..\Common\Codec\Audio\Common\pCODECS.c><pCODECS.c>
+File 7,1,<..\..\Common\Codec\Audio\AudioControl\AudioFile.c><AudioFile.c>
+File 8,1,<..\..\Common\Codec\Audio\RkEQ\Effect\Effect.c><Effect.c>
+File 8,2,<..\..\Common\Codec\Audio\RkEQ\filter_2_int_r.s><filter_2_int_r.s>
+File 8,2,<..\..\Common\Codec\Audio\RkEQ\filter_2_int_l.s><filter_2_int_l.s>
+File 8,4,<..\..\Common\Codec\Audio\Library\RkNano_EQ_V09_0514.lib><RkNano_EQ_V09_0514.lib>
+File 8,4,<..\..\Common\Codec\Audio\Library\RkNano_EQ_V10_0324.lib><RkNano_EQ_V10_0324.lib>
+File 9,1,<..\..\Common\Codec\UsbControl\USBControl.c><USBControl.c>
+File 9,1,<..\..\Common\Driver\USB\USBComm.c><USBComm.c>
+File 9,1,<..\..\Common\Driver\USB\host\HCD.c><HCD.c>
+File 9,1,<..\..\Common\Driver\USB\host\HCDIsr.c><HCDIsr.c>
+File 9,1,<..\..\Common\Driver\USB\host\MSC.c><MSC.c>
+File 9,1,<..\..\Common\Driver\USB\host\USBD.c><USBD.c>
+File 9,1,<..\..\Common\Driver\USB\device\storage.c><storage.c>
+File 9,1,<..\..\Common\Driver\USB\device\USBAudio.c><USBAudio.c>
+File 9,1,<..\..\Common\Driver\USB\device\USBDevice.c><USBDevice.c>
+File 9,1,<..\..\Common\Driver\USB\device\USBIsr.c><USBIsr.c>
+File 9,1,<..\..\Common\Driver\USB\device\USBSerial.c><USBSerial.c>
+File 10,1,<..\..\Common\Driver\MemDev\MemDev.c><MemDev.c>
+File 10,1,<..\..\Common\Driver\MemDev\SD_MMC\SDM.c><SDM.c>
+File 10,1,<..\..\Common\Driver\MemDev\SD_MMC\eMMC.c><eMMC.c>
+File 10,1,<..\..\Common\Driver\MemDev\SD_MMC\MMC.c><MMC.c>
+File 10,1,<..\..\Common\Driver\MemDev\SD_MMC\SD.c><SD.c>
+File 10,1,<..\..\Common\Driver\MemDev\SD_MMC\SDAdapt.c><SDAdapt.c>
+File 10,1,<..\..\Common\Driver\MemDev\SD_MMC\SDCtrl.c><SDCtrl.c>
+File 10,1,<..\..\Common\Driver\MemDev\SpiNor\SpiNor.c><SpiNor.c>
+File 11,1,<..\..\Common\Codec\USBAudio\USB20AudioIf.c><USB20AudioIf.c>
+File 11,1,<..\..\Common\Codec\USBAudio\USB20AudioProc.c><USB20AudioProc.c>
+File 11,1,<..\..\Common\Codec\USBAudio\USBAudioBuffer.c><USBAudioBuffer.c>
+File 12,1,<..\..\Common\RkVrPackFile\RkvrInterface.c><RkvrInterface.c>
+File 12,1,<..\..\Common\RkVrPackFile\sha256.c><sha256.c>
+File 12,1,<..\..\Common\RkVrPackFile\shareplib.c><shareplib.c>
+File 13,1,<..\..\Common\EdidSend\edid_send.c><edid_send.c>
+
+
+Options 1,0,0  // Target 'RkNano'
+ Device (Cortex-M3)
+ Vendor (ARM)
+ Cpu (CLOCK(12000000) CPUTYPE("Cortex-M3"))
+ FlashUt ()
+ StupF ()
+ FlashDR ()
+ DevID (4349)
+ Rgf ()
+ Mem ()
+ C ()
+ A ()
+ RL ()
+ OH ()
+ DBC_IFX ()
+ DBC_CMS ()
+ DBC_AMS ()
+ DBC_LMS ()
+ UseEnv=0
+ EnvBin ()
+ EnvInc ()
+ EnvLib ()
+ EnvReg ()
+ OrgReg ()
+ TgStat=16
+ OutDir (.\)
+ OutName (RkNano)
+ GenApp=1
+ GenLib=0
+ GenHex=0
+ Debug=1
+ Browse=1
+ LstDir (.\)
+ HexSel=1
+ MG32K=0
+ TGMORE=0
+ RunUsr 0 1 <fromELF --bin -o RkNano.bin  RkNano.axf>
+ RunUsr 1 0 <>
+ BrunUsr 0 0 <>
+ BrunUsr 1 0 <>
+ CrunUsr 0 0 <>
+ CrunUsr 1 0 <>
+ SVCSID <>
+ GLFLAGS=1790
+ ADSFLGA { 243,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ ACPUTYP ("Cortex-M3")
+ RVDEV ()
+ ADSTFLGA { 0,0,64,16,160,0,64,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ OCMADSOCM { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ OCMADSIRAM { 0,0,0,0,0,0,0,0,0 }
+ OCMADSIROM { 0,0,0,0,0,0,0,0,0 }
+ OCMADSXRAM { 0,0,0,0,0,0,0,0,0 }
+ OCR_RVCT { 1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ RV_STAVEC ()
+ ADSCCFLG { 13,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ ADSCMISC ()
+ ADSCDEFN ()
+ ADSCUDEF ()
+ ADSCINCD (..\..\Common\Include;..\..\Common\BootLoader;..\..\Common\System\Os;..\..\Common\System\ModuleOverlay;..\..\Common\System\SysService;..\..\Common\System\FileSeek;..\..\Common\Driver;..\..\Common\Driver\NVIC;..\..\Common\Driver\EMCTL;..\..\Common\Driver\ADC;..\..\Common\Driver\DMA;..\..\Common\Driver\PWM;..\..\Common\Driver\I2C;..\..\Common\Driver\IIS;..\..\Common\Driver\PLL;..\..\Common\Driver\SCU;..\..\Common\Driver\PMU;..\..\Common\Driver\GPIO;..\..\Common\Driver\IOMUX;..\..\Common\Driver\SPI;..\..\Common\Driver\TIMER;..\..\Common\Driver\SYSTICK;..\..\Common\Driver\SDMMC;..\..\Common\Driver\LCD;..\..\Common\Driver\KEY;..\..\Common\Driver\AD_KEY;..\..\Common\Driver\DAC;..\..\Common\Driver\DAC\rockcodec;..\..\Common\Driver\DAC\wm8987;..\..\Common\Driver\RadioDriver\QN8035;..\..\Common\FileSys;..\Resource;..\..\Common\Display;..\UI\dialog;..\UI\MainMenu;..\UI\MusicWin;..\UI\RadioWin;..\UI\PicWin;..\UI\RadioWin\RadioSubWin;..\UI\RecordWin;..\UI\TextWin;..\UI\Browser\BroCore;..\UI\Browser\BrowserUI;..\UI\SetMenu;..\UI\USB;..\..\Common\Codec\Audio\AudioControl;..\..\Common\Codec\Audio\Effect;..\..\Common\Codec\Audio\Include;..\..\Common\Codec\Audio\Mp3;..\..\Common\Codec\Audio\Spectrum;..\..\Common\Codec\Audio\RkEQ;..\..\Common\Codec\Audio\RkEQ\Effect;..\..\Common\Codec\Audio\RecordControl;..\..\Common\Codec\Audio\Wav;..\..\Common\Codec\Audio\Wav\WAV_LIB;..\..\Common\Codec\Radio;..\..\Common\Codec\Radio\FMControl;..\..\Common\Codec\Image\Imagecontrol;..\..\Common\Codec\Video\mp2;..\..\Common\Codec\Video\VideoControl;..\..\Common\Codec\Video\Avi\AviFile;..\UI\VideoWin;..\..\Common\Codec\Video\Avi;..\..\Common\Codec\Audio\ID3;..\..\Common\Codec\Audio\ID3\MusicAlbumJpgDec;..\UI\block;..\..\Common\SortFileInfo;..\UI\medialib;..\Scatter;..\..\Common\Driver\UART;..\..\Common\Driver\Nand;..\..\Common\Driver\DAC;..\..\Common\Driver\DAC\wm8987;..\..\Common\Driver\IMDCT36_SYNTH;..\..\Common\Codec\Audio\Aac;..\..\Common\Codec\Audio\ShuffleAll;..\..\Common\Driver\USB;..\..\Common\Driver\MemDev;..\..\Common\Driver\MemDev\Nand;..\..\Common\Driver\MemDev\SD_MMC;..\..\Common\Driver\MemDev\SpiNor;..\..\Common\Driver\RTC;..\UI\CharegeWin;..\..\Common\Codec\UsbControl;..\..\Common\Codec\BlueTooth;..\UI\BlueToothWin;..\..\Common\Codec\BlueTooth\lwbt;..\..\Common\Codec\Audio\Aec;..\..\Common\Codec\Audio\PlayFx;..\..\Common\Codec\USBAudio;..\..\Common\Codec\Audio\SSRC\resampler;..\..\Common\Codec\Audio\SSRC\;..\..\Common\Driver\USB\device;..\..\Common\Driver\USB\host;..\..\Common\Codec\BlueTooth\lwbt\chipset_cc2564;..\..\Common\Codec\BlueTooth\lwbt\chipset_rtk8761a;..\..\Common\Driver\Sesnor;..\..\Common\Driver\TC358870XBG;..\..\SDK;..\..\Common\Driver\TC358860XBG;..\..\Common\Driver\FUSB302;..\..\Common\Driver\touch)
+ ADSASFLG { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ ADSAMISC ()
+ ADSADEFN ()
+ ADSAUDEF ()
+ ADSAINCD ()
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=1
+ AlwaysBuild=0
+ GenAsm=0
+ AsmAsm=0
+ PublicsOnly=0
+ StopCode=3
+ CustArgs ()
+ LibMods ()
+ ADSLDFG { 16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ ADSLDTA (0x00000000)
+ ADSLDDA (0x00000000)
+ ADSLDSC (..\Scatter\scatter.sct)
+ ADSLDIB ()
+ ADSLDIC ()
+ ADSLDMC (--keep bt_init_script  --keep  voice_wait_pair --keep voice_Paried --keep  voice_call_coming  --keep ModuleInfo --keep eqArray --keep uldiv.o --keep ldiv.o --keep llshl.o --keep llushr.o --keep llsshr.o --keep siabs.o --keep memmovea.o --keep memseta.o --keep strcat.o --keep strncpy.o --keep strxfrm.o --keep strchr.o --keep strlen.o --keep strcmp.o --keep memchr.o --keep memcmp.o --keep strncat.o --keep strcoll.o --keep strcpy.o --keep strncmp.o --keep strrchr.o --keep strspn.o --keep strcspn.o --keep strpbrk.o --keep dadd.o --keep dmul.o --keep ddiv.o --keep dflt.o --keep dfltu.o --keep dfltll.o --keep dfltull.o --keep dfix.o --keep dfixu.o --keep dfixll.o --keep dfixull.o --keep f2d.o --keep cdcmple.o --keep cdrcmple.o --keep fadd.o --keep fmul.o --keep fdiv.o --keep fflt.o --keep ffltu.o --keep ffltll.o --keep ffltull.o --keep ffix.o --keep ffixu.o --keep ffixll.o --keep ffixull.o --keep d2f.o --keep cfcmple.o --keep cfrcmple.o --keep iusefp.o --keep depilogue.o --keep fepilogue.o --keep gslx680.o(fs_firmware))
+ ADSLDIF ()
+ ADSLDDW ()
+  OPTDL (SARMCM3.DLL)()(DLM.DLL)(-pEMBER)(SARMCM3.DLL)()(TLM.DLL)(-pEMBER)
+  OPTDBG 48126,1,()()()()()()()()()(..\Scatter\Boot.ini) (BIN\UL2CM3.DLL)()()()
+ FLASH1 { 1,0,0,0,0,0,0,0,255,255,255,255,0,0,0,0,0,0,0,0 }
+ FLASH2 ()
+ FLASH3 ("" ())
+ FLASH4 ()
+EndOpt
+

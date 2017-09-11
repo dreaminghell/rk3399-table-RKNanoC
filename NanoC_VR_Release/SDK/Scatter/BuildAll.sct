@@ -1,0 +1,1450 @@
+;
+;*******************************************************************************
+;                   Copyright (c) 2008,ZhengYongzhi
+;                         All rights reserved.
+;
+; File Name��   CortexM3.sct
+;
+; Description:
+;
+; History:      <author>          <time>        <version>
+;             ZhengYongzhi      2008-8-13          1.0
+;    desc:    ORG.
+;*******************************************************************************
+;
+#ifdef _NANDFLASH_
+#define FTL_CATCH_LEN       0xA0A0
+#else
+#define FTL_CATCH_LEN       0x0000
+#endif
+
+#define BOOT_ROM_BASE       0x00000000
+#define MICROLIB_BASE       0x00002000
+#define DRIVERLIB_BASE      0x00003000
+
+#define LOADER_CODE_BASE    0x01018000
+#define LOADER_DATA_BASE    0x03014000
+#define START_CODE_BASE     0x0101f000
+#define START_DATA_BASE     0x03016000
+
+#define SYS_CODE_BASE       0x01000000
+#define SYS_CODE_SIZE       0x00020000
+
+#define SYS_DATA_BASE       0x03000000
+#define SYS_DATA_SIZE       0x00018000
+
+#define HEAP_BASE           0x03016000
+#define HEAP_LIMIT          0x03016000
+
+#define STACK_LIMIT         0x03016000
+#define STACK_BASE          0x03018000
+
+START_REGION START_CODE_BASE OVERLAY
+{
+    START START_CODE_BASE
+    {
+        *.o(START_VECT, +First)
+        *.o(START_CODE)
+    }
+}
+
+MICROLIB_REGION  MICROLIB_BASE
+{
+    MICROLIB_CODE MICROLIB_BASE
+    {
+        uldiv.o
+        ldiv.o
+        llshl.o
+        llushr.o
+        llsshr.o
+        memmovea.o
+        memseta.o
+        strlen.o
+        strcmp.o
+        memcmp.o
+        strcpy.o
+        dadd.o
+        dmul.o
+        ddiv.o
+        dflt.o
+        dfltu.o
+        dfix.o
+        dfixu.o
+        f2d.o
+        cdcmple.o
+        fadd.o
+        fmul.o
+        fdiv.o
+        fflt.o
+        ffltu.o
+        ffix.o
+        ffixu.o
+        d2f.o
+        cfrcmple.o
+        iusefp.o
+        depilogue.o
+        fepilogue.o
+        dfltll.o
+        dfltull.o
+        dfixll.o
+        dfixull.o
+        ffltll.o
+        ffltull.o
+        ffixll.o
+        ffixull.o
+        cdrcmple.o
+        cfcmple.o
+        siabs.o
+        strcat.o
+        strncpy.o
+        strxfrm.o
+        strchr.o
+        memchr.o
+        strncat.o
+        strcoll.o
+        strncmp.o
+        strrchr.o
+        strspn.o
+        strcspn.o
+        strpbrk.o
+    }
+}
+
+LOAD_REGION SYS_CODE_BASE  OVERLAY
+{
+;
+;==============================================================================
+;
+;   Module Info Table
+;
+;==============================================================================
+;
+    MODULE_INFO 0x21000000
+    {
+        *.o(ModuleInfo)
+    }
+;
+;==============================================================================
+;
+;   System Section
+;
+;==============================================================================
+;
+    ;System Section
+    SYS_DATA (SYS_DATA_BASE)    OVERLAY
+    {
+        *.o(vect, +First)
+        *(+RW)
+        *(+ZI)
+    }
+
+    ;--------------------------------------------------------------
+    ;LCD Driver Section
+    ;LCD_DRIVER1_DATA(ImageLimit(SYS_DATA)) OVERLAY
+    ;{
+    ;    *(ST7637DriverData)
+    ;    *(ST7637DriverBss)
+    ;}
+    ;LCD_DRIVER2_DATA(ImageLimit(SYS_DATA)) OVERLAY
+    ;{
+    ;    *( ST7735DriverData)
+    ;    *( ST7735DriverBss)
+    ;}
+    ;#define LCD_DRIVER_DATA_END  ((ImageLimit(LCD_DRIVER2_DATA)>ImageLimit(LCD_DRIVER1_DATA))?ImageLimit(LCD_DRIVER2_DATA):ImageLimit(LCD_DRIVER1_DATA))
+    ;LCD_DRIVER_DATA_MAX (LCD_DRIVER_DATA_END) OVERLAY {}
+
+    ;--------------------------------------------------------------
+    ;Memory overlay
+    ;SD_MMC_DATA (LCD_DRIVER_DATA_END) OVERLAY
+    SD_MMC_DATA (ImageLimit(SYS_DATA)) OVERLAY
+    {
+        *(SDData)
+        *(SDInitData)
+        *(SDWriteData)
+        *(SDBss)
+        *(SDInitBss)
+        *(SDWriteBss)
+    }
+    USBCONTROL_DATA(ImageLimit(SD_MMC_DATA)) OVERLAY
+    {
+        *(UsbControlData)
+        *(UsbControlBss)
+    }
+
+    ;USBHOST_DATA(LCD_DRIVER_DATA_END) OVERLAY
+    USBHOST_DATA(ImageLimit(SYS_DATA)) OVERLAY
+    {
+       *(UsbHostData)
+       *(UsbHostBss)
+    }
+    #define MEMORY_DEV_DATA_END  ((ImageLimit(USBCONTROL_DATA)>ImageLimit(USBHOST_DATA))?ImageLimit(USBCONTROL_DATA):ImageLimit(USBHOST_DATA))
+    MEMORY_DEV_DATA_MAX (MEMORY_DEV_DATA_END) OVERLAY {}
+;
+;==============================================================================
+;
+;   System Init Section
+;
+;==============================================================================
+;
+    SYS_INIT_DATA (MEMORY_DEV_DATA_END) OVERLAY
+    {
+        *(SysInitData)
+        *(FlashInitData)
+        *(FatInitData)
+
+        *(SysInitBss)
+        *(FlashInitBss)
+        *(FatInitBss)
+    }
+    #define SYS_INIT_DATA_END (ImageLimit(SYS_INIT_DATA))
+    SYS_INIT_DATA_MAX (ImageLimit(SYS_INIT_DATA)) OVERLAY {}
+;
+;==============================================================================
+;
+;   UI Section
+;
+;   MainMenu、MusicWin、RadioWin、RecordWin、Text、Browser、SystemSet
+;   and
+;   Music、Radio、Record
+;
+;
+;==============================================================================
+;
+    #define UI_DATA_BASE  MEMORY_DEV_DATA_END
+
+    ;--------------------------------------------------------------
+    ;MainMenu, Overlay with Other UI Section
+    MAINMENU_DATA (UI_DATA_BASE) OVERLAY
+    {
+        *(MainMenuData)
+        *(MainMenuServiceData)
+        *(MainMenuInitData)
+        *(MainMenuDeInitData)
+
+        *(MainMenuBss)
+        *(MainMenuServiceBss)
+        *(MainMenuInitBss)
+        *(MainMenuDeInitBss)
+    }
+    #define UI_MAINMENU_DATA_MAX  (ImageLimit(MAINMENU_DATA))
+
+    ;--------------------------------------------------------------
+    ;MusicWin
+    MUSICWIN_DATA (UI_DATA_BASE) OVERLAY
+    {
+        *(MusicData)
+        *(MusicInitData)
+        *(MusicDeInitData)
+        *(MusicServiceData)
+
+        *(MusicBss)
+        *(MusicServiceBss)
+        *(MusicInitBss)
+        *(MusicDeInitBss)
+
+        *(MusicLrcInitData)
+        *(MusicLrcPlayData)
+        *(MusicLrcCommonData)
+
+        *(MusicLrcInitBss)
+        *(MusicLrcPlayBss)
+        *(MusicLrcCommonBss)
+    }
+    ;Compare Max UI Secton
+    #define UI_MUSICWIN_DATA_MAX ((ImageLimit(MUSICWIN_DATA) > UI_MAINMENU_DATA_MAX) ? ImageLimit(MUSICWIN_DATA) : UI_MAINMENU_DATA_MAX)
+
+
+    ;------------------------------------------------------------------------------------
+    ;charge win
+    CHARGEWIN_DATA (UI_DATA_BASE) OVERLAY
+    {
+        *(ChargeWinData)
+        *(ChargeWinBss)
+    }
+    ;Compare Max UI Secton
+    #define UI_CHARGEWIN_DATA_MAX    ((ImageLimit(CHARGEWIN_DATA) > UI_MUSICWIN_DATA_MAX) ? ImageLimit(CHARGEWIN_DATA) : UI_MUSICWIN_DATA_MAX)
+
+    ;------------------------------------------------------------------------------------
+    ;BTWin
+    BTWIN_DATA (UI_DATA_BASE) OVERLAY
+    {
+        *(BlueToothWinData)
+        *(BlueToothWinBss)
+        bluetoothwin.o(+RW)
+    }
+    ;Compare Max UI Secton
+    #define UI_BTWIN_DATA_MAX    ((ImageLimit(BTWIN_DATA) > UI_CHARGEWIN_DATA_MAX) ? ImageLimit(BTWIN_DATA) : UI_CHARGEWIN_DATA_MAX)
+
+    ;------------------------------------------------------------------------------------
+    ;USB Win
+    USBWIN_DATA(UI_DATA_BASE) OVERLAY
+    {
+        *(UsbUIData)
+        *(UsbUIBss)
+    }
+    ;Compare Max UI Secton
+    #define UI_USBWIN_DATA_MAX  ((ImageLimit(USBWIN_DATA) > UI_BTWIN_DATA_MAX) ? ImageLimit(USBWIN_DATA) : UI_BTWIN_DATA_MAX)
+
+    #define UI_DATA_MAX   UI_USBWIN_DATA_MAX
+
+;
+;==============================================================================
+;
+;   Audio Control/EQ Section
+;
+;==============================================================================
+;
+    ;Audio Control
+    AUDIO_CONTROL_DATA (UI_DATA_MAX) OVERLAY
+    {
+        *(AudioData)
+        *(AudioBss)
+
+        *(AudioEQData)
+        *(AudioEQBss)
+        effect.o(+RW)
+    }
+    #define AUDIO_CONTROL_DATA_END (ImageLimit(AUDIO_CONTROL_DATA))
+    ScatterAssert(AUDIO_CONTROL_DATA_END < (STACK_LIMIT - FTL_CATCH_LEN))
+
+    ;RK EQ
+    RK_EQ_DATA  (ImageLimit(AUDIO_CONTROL_DATA)) OVERLAY
+    {
+        *(RkEqBss)
+        rk_nano_eq.o(+RW)
+        rk_nano_eq.o(+ZI)
+
+    }
+    RKEQ_TABLE_DATA (ImageLimit(AUDIO_CONTROL_DATA)) OVERLAY
+    {
+        *(RkEqData)
+    }
+
+    ;MS EQ
+    MS_EQ_DATA  (ImageLimit(AUDIO_CONTROL_DATA)) OVERLAY
+    {
+        *(MsEqData)
+        *(MsEqBss)
+    }
+    #define EQ_MSEQ_DATA_MAX    ((ImageLimit(MS_EQ_DATA) > ImageLimit(RK_EQ_DATA)) ? ImageLimit(MS_EQ_DATA) : ImageLimit(RK_EQ_DATA))
+
+    ;BBE EQ
+    BBE_EQ_DATA  (ImageLimit(AUDIO_CONTROL_DATA)) OVERLAY
+    {
+        *(BBEData)
+        *(BBEBss)
+    }
+    #define EQ_BBE_DATA_MAX    ((ImageLimit(BBE_EQ_DATA) > EQ_MSEQ_DATA_MAX) ? ImageLimit(BBE_EQ_DATA) : EQ_MSEQ_DATA_MAX)
+
+    #define AUDIO_EQ_DATA_END  EQ_BBE_DATA_MAX
+
+;
+;==============================================================================
+;
+;   Audio File Decoder Section
+;
+;==============================================================================
+;
+    ; Audio File Decode
+    AUDIO_FILE_DATA  (AUDIO_EQ_DATA_END) OVERLAY
+    {
+        *(AudioFileData)
+        *(AudioFileBss)
+    }
+    #define AUDIO_FILE_DATA_END (ImageLimit(AUDIO_FILE_DATA))
+
+    #define AUDIO_DECODE_DATA_BASE  AUDIO_FILE_DATA_END
+
+    ;---------------------------------------------------------------
+    ;Mp3 Decode
+    MP3_DECODE_DATA (AUDIO_DECODE_DATA_BASE) OVERLAY
+    {
+        *(Mp3Data)
+        *(Mp3Bss)
+        *(Mp3InitData)
+        *(Mp3InitBss)
+        *(Mp3TblDate)
+
+    }
+    MP3_DECODE_DATA_END (ImageLimit(MP3_DECODE_DATA)) OVERLAY {}
+    ScatterAssert(ImageLimit(MP3_DECODE_DATA) < (STACK_LIMIT))
+
+    ;--------------------------------------------------------------
+    ;Wma Decode
+    WMA_COMMON_DATA (AUDIO_DECODE_DATA_BASE) OVERLAY
+    {
+        *(WmaDecoderData)
+        *(WmaDecoderBss)
+
+        pwma.o(+RW)
+        pwma.o(+ZI)
+
+        wmaudio.o(+RW)
+        wmaudio.o(+ZI)
+
+        drmpd.o(+RW)
+        drmpd.o(+ZI)
+    }
+    WMA_OPEN_CODEC_DATA (ImageLimit(WMA_COMMON_DATA)) OVERLAY
+    {
+        *(WmaOpenCodecData)
+        *(WmaOpenCodecBss)
+        msaudiostdpro.o(+RW)
+        msaudiostdpro.o(+ZI)
+    }
+    WMA_DATA_16Ob_DATA (ImageLimit(WMA_COMMON_DATA)) OVERLAY
+    {
+    	*(wma_16Ob)
+    }
+    WMA_DATA_44Qb_DATA (ImageLimit(WMA_COMMON_DATA)) OVERLAY
+    {
+    	*(wma_44Qb)
+    }
+    WMA_DATA_44Ob_DATA (ImageLimit(WMA_COMMON_DATA)) OVERLAY
+    {
+    	*(wma_44Ob)
+    }
+    WMA_HIGH_LOW_COMMON_DATA (ImageLimit(WMA_DATA_44Qb_DATA)) OVERLAY
+    {
+    }
+    WMA_HIGH_RATE_DATA (ImageLimit(WMA_HIGH_LOW_COMMON_DATA)) OVERLAY
+    {
+    }
+    WMA_HIGH_RATE_DATA_END (ImageLimit(WMA_HIGH_RATE_DATA)) OVERLAY {}
+    ScatterAssert(ImageLimit(WMA_HIGH_RATE_DATA) < (STACK_LIMIT))
+
+    WMA_LOW_RATE_DATA (ImageLimit(WMA_HIGH_LOW_COMMON_DATA)) OVERLAY
+    {
+    }
+    WMA_LOW_RATE_DATA_END  (ImageLimit(WMA_LOW_RATE_DATA))  OVERLAY {}
+    ScatterAssert(ImageLimit(WMA_LOW_RATE_DATA) < (STACK_LIMIT))
+
+    ;---------------------------------------------------------------
+    ;WavDecode
+    WAV_DECODE_DATA (AUDIO_DECODE_DATA_BASE) OVERLAY
+    {
+        *(WavDecData)
+        *(WavDecBss)
+        *(WavDecInitData)
+        *(WavDecInitBss)
+    }
+    WAV_DECODE_DATA_END (ImageLimit(WAV_DECODE_DATA)) OVERLAY {}
+    ScatterAssert(ImageLimit(WAV_DECODE_DATA) < (STACK_LIMIT))
+
+    ;---------------------------------------------------------------
+    ;FlacDecode
+    FLAC_DECODE_DATA (AUDIO_DECODE_DATA_BASE) OVERLAY
+    {
+        *(FlacDecData)
+        *(FlacDecBss)
+        flac_stream_decoder.o(+RW)
+        flac_stream_decoder.o(+ZI)
+    }
+    FLAC_DECODE_DATA_END (ImageLimit(FLAC_DECODE_DATA)) OVERLAY {}
+    ScatterAssert(ImageLimit(FLAC_DECODE_DATA) < (STACK_LIMIT))
+
+    ;---------------------------------------------------------------
+    ;APEDecode
+    APE_DECODE_DATA (AUDIO_DECODE_DATA_BASE) OVERLAY
+    {
+        *(ApeDecData)
+        *(ApeDecBss)
+    }
+    APE_DECODE_DATA_END (ImageLimit(APE_DECODE_DATA)) OVERLAY {}
+    ScatterAssert(ImageLimit(APE_DECODE_DATA) < (STACK_LIMIT))
+
+;
+;==============================================================================
+;
+;   FM/Record Control Section
+;
+;==============================================================================
+;
+    ;Radio Control
+    FM_CONTROL_DATA (UI_DATA_MAX) OVERLAY
+    {
+        *(FmControlData)
+        *(FmControlBss)
+    }
+
+    //FM Radio Driver1
+    FM_DRIVER1_DATA (ImageLimit(FM_CONTROL_DATA)) OVERLAY
+    {
+        *(Qn8035DriverData)
+        *(Qn8035DriverBss)
+    }
+
+    //FM Radio Driver1
+    FM_DRIVER2_DATA (ImageLimit(FM_CONTROL_DATA)) OVERLAY
+    {
+        *(Fm5807DriverData)
+        *(Fm5807DriverBss)
+    }
+    #define RADIO_DRIVE_DATA_MAX  ((ImageLimit(FM_DRIVER1_DATA) > ImageLimit(FM_DRIVER2_DATA)) ? ImageLimit(FM_DRIVER2_DATA) : ImageLimit(FM_DRIVER2_DATA))
+    FM_DRIVER_DATA_END (RADIO_DRIVE_DATA_MAX) OVERLAY {}
+
+    ;--------------------------------------------------------------
+    ;Record Control
+    RECORD_CONTROL_DATA (RADIO_DRIVE_DATA_MAX) OVERLAY
+    {
+        *(RecordControlData)
+        *(RecordControlBss)
+        recordcontrol.o(+RW)
+    }
+    ENCODE_MSADPCM_DATA(ImageLimit(RECORD_CONTROL_DATA)) OVERLAY
+    {
+        *(EncodeMsadpcmData)
+        *(EncodeMsadpcmBss)
+    }
+    RECORD_DATA_END (ImageLimit(ENCODE_MSADPCM_DATA)) OVERLAY {}
+    ScatterAssert(ImageLimit(ENCODE_MSADPCM_DATA) < (STACK_LIMIT - FTL_CATCH_LEN))
+;
+;
+;==============================================================================
+;
+;   Video/Image Section
+;
+;==============================================================================
+;
+    #define VIDEO_DATA_BASE MEMORY_DEV_DATA_END
+
+    ;--------------------------------------------------------------
+    ;Video
+    VIDEOWIN_DATA (VIDEO_DATA_BASE) OVERLAY
+    {
+        *(VideoWinData)
+        *(VideoWinBss)
+    }
+
+    VIDEO_CONTROL_DATA (ImageLimit(VIDEOWIN_DATA)) OVERLAY
+    {
+        *(VideoControlData)
+        *(VideoControlBss)
+        video_audiocontrol.o(+RW)
+    }
+    ScatterAssert(ImageLimit(VIDEO_CONTROL_DATA) < (STACK_LIMIT - FTL_CATCH_LEN))
+
+    MP2_DECODE_DATA (ImageLimit(VIDEO_CONTROL_DATA)) OVERLAY
+    {
+        *(Mp2Data)
+        *(Mp2Bss)
+    }
+    AVI_DECODE_DATA (ImageLimit(MP2_DECODE_DATA)) OVERLAY
+    {
+        *(AviDecData)
+        *(XvidDecData)
+        *(AviDecBss)
+        *(XvidDecBss)
+    }
+    AVI_DATA_END (ImageLimit(AVI_DECODE_DATA)) OVERLAY {}
+    ScatterAssert(ImageLimit(AVI_DECODE_DATA) < (STACK_LIMIT))
+
+    ;--------------------------------------------------------------
+    ;Picture
+    PICWIN_DATA (VIDEO_DATA_BASE) OVERLAY
+    {
+        *(PicWinData)
+        *(PicWinBss)
+    }
+    IMAGE_CONTROL_DATA (ImageLimit(PICWIN_DATA)) OVERLAY
+    {
+        *(ImageContrlData)
+        *(ImageContrlBss)
+        *(ImageData)
+        *(ImageBss)
+    }
+    JPG_DECODE_DATA (ImageLimit(IMAGE_CONTROL_DATA)) OVERLAY
+    {
+        *(JpgDecData)
+        *(JpgDecBss)
+    }
+    JPG_DECODE_DATA_END (ImageLimit(JPG_DECODE_DATA)) OVERLAY {}
+
+    BMP_DECODE_DATA (ImageLimit(IMAGE_CONTROL_DATA)) OVERLAY        ;bmp Decode Data
+    {
+        *(BmpDecData)
+        *(BmpDecBss)
+        BMPDEC.o(+RW)
+        BMPDEC.o(+ZI)
+    }
+    BMP_DECODE_DATA_END (ImageLimit(BMP_DECODE_DATA)) OVERLAY {}
+
+    #define IMAGE_DATA_END   ((ImageLimit(JPG_DECODE_DATA) > ImageLimit(BMP_DECODE_DATA)) ? ImageLimit(JPG_DECODE_DATA) : ImageLimit(BMP_DECODE_DATA))
+    ScatterAssert(IMAGE_DATA_END < (STACK_LIMIT))
+
+;
+;==============================================================================
+;
+;   USB Section
+;
+;==============================================================================
+;
+    ;USB MSC
+    USBMSC_DATA (UI_DATA_MAX) OVERLAY
+    {
+        *(UsbMSCData)
+        *(UsbMSCBss)
+        storage.o(+RW)
+    }
+    USBMSC_DATA_END (ImageLimit(USBMSC_DATA)) OVERLAY {}
+    ScatterAssert(ImageLimit(USBMSC_DATA) < (STACK_LIMIT - FTL_CATCH_LEN))
+
+    ;USB Audio
+    USBAUDIO_DATA (AUDIO_EQ_DATA_END) OVERLAY
+    {
+        *(UsbAudioData)
+        *(UsbAudioBss)
+    }
+    USBAUDIO_DATA_END (ImageLimit(USBAUDIO_DATA)) OVERLAY {}
+    ScatterAssert(ImageLimit(USBAUDIO_DATA) < (STACK_LIMIT))
+
+    ;USB Serial
+    USB_SERIAL_DATA (UI_DATA_MAX) OVERLAY
+    {
+    }
+    USB_SERIAL_DATA_END (ImageLimit(USB_SERIAL_DATA)) OVERLAY {}
+;
+;==============================================================================
+;
+;   Bluetooth Section
+;
+;==============================================================================
+;
+    ;---------------------------------------------------------------
+    ;A2DP section
+    ;Sbc Decode
+    SBC_DECODE_DATA (AUDIO_DECODE_DATA_BASE) OVERLAY
+    ;SBC_DECODE_DATA (AUDIO_EQ_DATA_END) OVERLAY
+    {
+        *(SbcDecData)
+        *(SbcDecBss)
+        *(SSRCData)
+        *(SSRCBss)
+    }
+
+    ;AacDecode
+    AAC_DECODE_DATA (AUDIO_DECODE_DATA_BASE) OVERLAY
+    ;AAC_DECODE_DATA (AUDIO_EQ_DATA_END) OVERLAY
+    {
+        *(AacDecData)
+        *(AacDecBss)
+        *(AacROData)
+        aacdec.o(+RW)
+    }
+    #define BT_AUDIO_DATA_MAX ((ImageLimit(SBC_DECODE_DATA) > ImageLimit(AAC_DECODE_DATA)) ? ImageLimit(SBC_DECODE_DATA) : ImageLimit(AAC_DECODE_DATA))
+
+    ;A2DP
+    BT_AUDIO_DATA (BT_AUDIO_DATA_MAX) OVERLAY
+    {
+        *(BlueToothAudioData)
+        *(BlueToothAudioBss)
+    }
+    #define BT_AUDIO_DATA_END  ImageLimit(BT_AUDIO_DATA)
+
+    ;---------------------------------------------------------------
+    ;HFP section
+    ;Aec algorithm
+    AEC_ALG_DATA (AUDIO_CONTROL_DATA_END) OVERLAY
+    {
+        *(AecAlgData)
+        *(AecAlgBss)
+    }
+
+    ;HFP
+    BT_PHONE_DATA (ImageLimit(AEC_ALG_DATA)) OVERLAY
+    {
+        *(BlueToothPhoneData)
+        *(BlueToothPhoneBss)
+    }
+    #define BT_HFP_DATA_MAX  ((ImageLimit(BT_PHONE_DATA) > ImageLimit(BT_AUDIO_DATA)) ? ImageLimit(BT_PHONE_DATA) : ImageLimit(BT_AUDIO_DATA))
+
+    ;---------------------------------------------------------------
+    ;Voice notify
+    BT_VOICENOTIFY_DATA (AUDIO_CONTROL_DATA_END) OVERLAY
+    {
+        *(BlueToothVoiceNotifyData)
+        *(BlueToothVoiceNotifyBss)
+    }
+    #define BT_NOTIFY_DATA_MAX  ((ImageLimit(BT_VOICENOTIFY_DATA) > BT_HFP_DATA_MAX) ? ImageLimit(BT_VOICENOTIFY_DATA) : BT_HFP_DATA_MAX)
+
+    ;---------------------------------------------------------------
+    ;LwBT
+    LWBT_DATA (BT_NOTIFY_DATA_MAX) OVERLAY                    ;Mp3 Decode Data
+    {
+        *(LwbtData)
+        *(LwbtBss)
+    }
+    ; bluetooth
+    BTCONTROL_DATA (ImageLimit(LWBT_DATA)) OVERLAY
+    {
+        *(BlueToothControlData)
+        *(BlueToothControlBss)
+    }
+    BTCONTROL_DATA_END (ImageLimit(BTCONTROL_DATA)) OVERLAY {}
+    ScatterAssert(ImageLimit(BTCONTROL_DATA) < (STACK_LIMIT))
+
+;==============================================================================
+;
+;   MediaLib Section
+;
+;==============================================================================
+;
+    ;---------------------------------------------------------------------
+    ; ID3
+    AUDIO_ID3_DATA (AUDIO_FILE_DATA_END) OVERLAY
+    {
+        *(Id3Data)
+        *(WmaId3Data)
+        *(Id3Bss)
+        *(WmaId3Bss)
+    }
+    AUDIO_ID3JPEG_DATA (ImageLimit(AUDIO_ID3_DATA)) OVERLAY
+    {
+        *(Id3JpgData)
+        *(Id3JpgBss)
+        album_jpgdec_decompress.o(+RW)
+        album_jpgdec_decompress.o(+ZI)
+    }
+    AUDIO_ID3JPEG_DATA_END (ImageLimit(AUDIO_ID3JPEG_DATA))   OVERLAY {}
+    ScatterAssert(ImageLimit(AUDIO_ID3JPEG_DATA) < (STACK_LIMIT))
+
+    ;--------------------------------------------------------------
+    ;file information search and save
+    FILE_INFO_SAVE_DATA (ImageLimit(AUDIO_ID3_DATA))   OVERLAY
+    {
+        *(FileInfoSaveData)
+       *(FileInfoSaveBss)
+    }
+    FILE_INFO_SAVE_DATA_END (ImageLimit(FILE_INFO_SAVE_DATA))   OVERLAY {}
+    ScatterAssert(ImageLimit(FILE_INFO_SAVE_DATA) < (STACK_LIMIT))
+
+    ;
+    ;--------------------------------------------------------------
+    ;file information sort
+    FILE_INFO_SORT_DATA (ImageLimit(AUDIO_ID3_DATA))   OVERLAY
+    {
+        *(FileInfoSortData)
+       *(FileInfoSortBss)
+    }
+    FILE_INFO_SORT_DATA_END (ImageLimit(FILE_INFO_SORT_DATA))   OVERLAY {}
+    ScatterAssert(ImageLimit(FILE_INFO_SORT_DATA) < (STACK_LIMIT))
+
+    ;--------------------------------------------------------------
+    ;favorite
+    FAVORESET_DATA (ImageLimit(AUDIO_ID3_DATA))   OVERLAY
+    {
+        *(FavoResetData)
+        *(FavoResetBss)
+    }
+    FAVORESET_DATA_END (ImageLimit(FAVORESET_DATA))   OVERLAY {}
+    ScatterAssert(ImageLimit(FAVORESET_DATA) < (STACK_LIMIT))
+
+;==============================================================================
+;
+;   Heap&Stack Section
+;
+;==============================================================================
+;
+    FTL_CACHE_BUF2 HEAP_BASE -(0x8040 + 0x3000) OVERLAY
+    {
+        *(ftlcache2)
+    }
+    FTL_CACHE_BUF HEAP_BASE -(0x8040)           OVERLAY
+    {
+        *(ftlcache)
+    }
+    ARM_LIB_HEAP    HEAP_BASE EMPTY (HEAP_LIMIT - HEAP_BASE)        ; Heap size == 0
+    {
+    }
+
+    ARM_LIB_STACK   STACK_BASE EMPTY -(STACK_BASE - STACK_LIMIT)    ; Stack 0x20010000 -- 0x2000e000
+    {
+    }
+
+;*******************************************************************************************************************************************
+;
+;   Code Section
+;
+;*******************************************************************************************************************************************
+;
+;==============================================================================
+;
+;   System Section
+;
+;==============================================================================
+;
+    ;System Section
+    SYS_CODE (SYS_CODE_BASE)    OVERLAY
+    {
+        *(+RO)
+    }
+
+    ;--------------------------------------------------------------
+    ;LCD Driver Section
+    LCD_DRIVER1_CODE(ImageLimit(SYS_CODE)) OVERLAY
+    {
+        *(ST7637DriverCode)
+        lcd1.5_st7637_128x128_1.0.o(+RO)
+    }
+    LCD_DRIVER2_CODE(ImageLimit(SYS_CODE)) OVERLAY
+    {
+        *(ST7735DriverCode)
+        lcd1.8_st7735_1.0.o(+RO)
+    }
+    #define LCD_DRIVER_CODE_MAX  ((ImageLimit(LCD_DRIVER2_CODE)>ImageLimit(LCD_DRIVER1_CODE))?ImageLimit(LCD_DRIVER2_CODE):ImageLimit(LCD_DRIVER1_CODE))
+    LCD_DRIVER_CODE_END (LCD_DRIVER_CODE_MAX) OVERLAY {}
+
+;
+;==============================================================================
+;
+;   System Init Section
+;
+;==============================================================================
+;
+    SYS_INIT_CODE (LCD_DRIVER_CODE_MAX) OVERLAY
+    {
+        *(SysInitCode)
+        *(FlashInitCode)
+        *(FatInitCode)
+    }
+    #define SYS_INIT_CODE_END (ImageLimit(SYS_INIT_CODE))
+    SYS_INIT_CODE_MAX (ImageLimit(SYS_INIT_CODE)) OVERLAY {}
+;
+;==============================================================================
+;
+;   UI Section
+;
+;   MainMenu、MusicWin、RadioWin、RecordWin、Text、Browser、SystemSet
+;   and
+;   Music、Radio、Record
+;
+;
+;==============================================================================
+;
+    #define UI_CODE_BASE  LCD_DRIVER_CODE_MAX
+
+    ;--------------------------------------------------------------
+    ;MainMenu, Overlay with Other UI Section
+    MAINMENU_CODE (UI_CODE_BASE) OVERLAY
+    {
+        *(MainMenuCode)
+        *(MainMenuServiceCode)
+        *(MainMenuInitCode)
+        *(MainMenuDeInitCode)
+    }
+    #define UI_MAINMENU_CODE_MAX  (ImageLimit(MAINMENU_CODE))
+
+    ;--------------------------------------------------------------
+    ;MedialibWin
+    MEDIALIBWIN_CODE (UI_CODE_BASE) OVERLAY
+    {
+        *(MediaWinCode)
+        *(MediaWinServiceCode)
+        *(MediaWinInitCode)
+        *(MediaWinDeInitCode)
+    }
+    ;Compare Max UI Secton
+    #define UI_MEDIALIBWIN_CODE_MAX ((ImageLimit(MEDIALIBWIN_CODE) > UI_MAINMENU_CODE_MAX) ? ImageLimit(MEDIALIBWIN_CODE) : UI_MAINMENU_CODE_MAX)
+
+    ;--------------------------------------------------------------
+    ;MediabroWin
+    MEDIABROWIN_CODE (UI_CODE_BASE) OVERLAY
+    {
+        *(MediaBroCode)
+        *(MediaBroServiceCode)
+        *(MediaBroInitCode)
+        *(MediaBroDeInitCode)
+    }
+    //sort get sub win
+    MEDIABRO_SORTGET_CODE (ImageLimit(MEDIABROWIN_CODE)) OVERLAY
+    {
+        *(MediaBroSortGetCode)
+    }
+    //Media browser sub win
+    MEDIABROSUBWIN_CODE (ImageLimit(MEDIABROWIN_CODE)) OVERLAY
+    {
+        *(MediaBroSubCode)
+    }
+    #define MEDIABROSUBWIN_CODE_MAX    ((ImageLimit(MEDIABROSUBWIN_CODE) > ImageLimit(MEDIABRO_SORTGET_CODE)) ? ImageLimit(MEDIABROSUBWIN_CODE) : ImageLimit(MEDIABRO_SORTGET_CODE))
+
+    //favorate sub win
+    MEDIAFAVOSUBWIN_CODE (ImageLimit(MEDIABROWIN_CODE)) OVERLAY
+    {
+        *(MediaFavoSubCode)
+    }
+    #define MEDIAFAVOSUBWIN_CODE_MAX    ((ImageLimit(MEDIAFAVOSUBWIN_CODE) > MEDIABROSUBWIN_CODE_MAX) ? ImageLimit(MEDIAFAVOSUBWIN_CODE) : MEDIABROSUBWIN_CODE_MAX)
+
+    ;Compare Max UI Secton
+    #define UI_MEDIABROWIN_CODE_MAX    ((MEDIAFAVOSUBWIN_CODE_MAX > UI_MEDIALIBWIN_CODE_MAX) ? MEDIAFAVOSUBWIN_CODE_MAX : UI_MEDIALIBWIN_CODE_MAX)
+
+    ;--------------------------------------------------------------
+    ;BrowserWin
+    BROWSER_CODE (UI_CODE_BASE) OVERLAY
+    {
+        *(BroUICode)
+        *(BroCoreCode)
+    }
+    ;Compare Max UI Secton
+    #define UI_BROWSER_CODE_MAX  ((ImageLimit(BROWSER_CODE) > UI_MEDIABROWIN_CODE_MAX) ? ImageLimit(BROWSER_CODE) : UI_MEDIABROWIN_CODE_MAX)
+
+    ;--------------------------------------------------------------
+    ;MusicWin
+    MUSICWIN_CODE (UI_CODE_BASE) OVERLAY
+    {
+        *(MusicCode)
+        *(MusicServiceCode)
+        *(MusicInitCode)
+        *(MusicDeInitCode)
+
+        *(MusicLrcCommonCode)
+        *(MusicLrcCode)
+        *(MusicLrcInitCode)
+    }
+    ;Compare Max UI Secton
+    #define UI_MUSICWIN_CODE_MAX ((ImageLimit(MUSICWIN_CODE) > UI_BROWSER_CODE_MAX) ? ImageLimit(MUSICWIN_CODE) : UI_BROWSER_CODE_MAX)
+
+    ;--------------------------------------------------------------
+    ;RadioWin
+    RADIOWIN_CODE (UI_CODE_BASE) OVERLAY
+    {
+        *(RadioWinCode)
+        *(RadioWinInitCode)
+        *(RadioWinDeInitCode)
+        *(RadioWinServiceCode)
+        *(RadioSubWinCode)
+    }
+    ;Compare Max UI Secton
+    #define UI_RADIOWIN_CODE_MAX    ((ImageLimit(RADIOWIN_CODE) > UI_MUSICWIN_CODE_MAX) ? ImageLimit(RADIOWIN_CODE) : UI_MUSICWIN_CODE_MAX)
+
+    ;--------------------------------------------------------------
+    ;RecordWin
+    RECORDWIN_CODE (UI_CODE_BASE) OVERLAY
+    {
+        *(RecordWinCode)
+        *(RecordWinServiceCode)
+        *(RecordWinInitCode)
+        *(RecordWinDeInitCode)
+    }
+    ;Compare Max UI Secton
+    #define UI_RECORDWIN_CODE_MAX    ((ImageLimit(RECORDWIN_CODE) > UI_RADIOWIN_CODE_MAX) ? ImageLimit(RECORDWIN_CODE) : UI_RADIOWIN_CODE_MAX)
+
+    ;--------------------------------------------------------------
+    ;TextWin
+    TEXTWIN_CODE (UI_CODE_BASE) OVERLAY
+    {
+        *(TextWinCode)
+        *(TextWinServiceCode)
+        *(TextWinInitCode)
+        *(TextWinDeInitCode)
+    }
+    ;Compare Max UI Secton
+    #define UI_TEXTWIN_CODE_MAX    ((ImageLimit(TEXTWIN_CODE) > UI_RECORDWIN_CODE_MAX) ? ImageLimit(TEXTWIN_CODE) : UI_RECORDWIN_CODE_MAX)
+
+    ;--------------------------------------------------------------
+    ;SetMenuWin
+    SETMENU_CODE (UI_CODE_BASE) OVERLAY
+    {
+        *(SetMenuCode)
+        *(SetCommonCode)
+        *(SetMenuServiceCode)
+        *(SetMenuInitCode)
+        *(SetMenuDeInitCode)
+        systemset.o(+RO)
+    }
+    ;Compare Max UI Secton
+    #define UI_SETMENU_CODE_MAX ((ImageLimit(SETMENU_CODE) > UI_TEXTWIN_CODE_MAX) ? ImageLimit(SETMENU_CODE) : UI_TEXTWIN_CODE_MAX)
+
+    ;------------------------------------------------------------------------------------
+    ;charge win
+    CHARGEWIN_CODE (UI_CODE_BASE) OVERLAY
+    {
+        *(ChargeWinCode)
+    }
+    ;Compare Max UI Secton
+    #define UI_CHARGEWIN_CODE_MAX    ((ImageLimit(CHARGEWIN_CODE) > UI_SETMENU_CODE_MAX) ? ImageLimit(CHARGEWIN_CODE) : UI_SETMENU_CODE_MAX)
+
+    ;------------------------------------------------------------------------------------
+    ;BTWin
+    BTWIN_CODE (UI_CODE_BASE) OVERLAY
+    {
+        *(BlueToothWinCode)
+    }
+    ;Compare Max UI Secton
+    #define UI_BTWIN_CODE_MAX    ((ImageLimit(BTWIN_CODE) > UI_CHARGEWIN_CODE_MAX) ? ImageLimit(BTWIN_CODE) : UI_CHARGEWIN_CODE_MAX)
+
+    ;------------------------------------------------------------------------------------
+    ;USB Win
+    USBWIN_CODE (UI_CODE_BASE) OVERLAY
+    {
+        *(UsbUICode)
+        funusb.o(+RO)
+    }
+    ;Compare Max UI Secton
+    #define UI_USBWIN_CODE_MAX  ((ImageLimit(USBWIN_CODE) > UI_BTWIN_CODE_MAX) ? ImageLimit(USBWIN_CODE) : UI_BTWIN_CODE_MAX)
+    #define UI_CODE_MAX   UI_USBWIN_CODE_MAX
+
+;
+;==============================================================================
+;
+;   Audio Control/EQ Section
+;
+;==============================================================================
+;
+    ;Audio Control
+    AUDIO_CONTROL_CODE (UI_CODE_MAX) OVERLAY
+    {
+        *(AudioCode)
+        *(AudioEQCode)
+        audiocontrol.o(+RO)
+    }
+    #define AUDIO_CONTROL_CODE_END (ImageLimit(AUDIO_CONTROL_CODE))
+
+    ;RK EQ
+    RK_EQ_CODE  (ImageLimit(AUDIO_CONTROL_CODE)) OVERLAY
+    {
+        *(RkEqCode)
+    }
+    RKEQ_TABLE_CODE (ImageLimit(AUDIO_CONTROL_CODE)) OVERLAY
+    {
+    }
+
+    #define AUDIO_EQ_CODE_END  (ImageLimit(RK_EQ_CODE))
+
+;
+;==============================================================================
+;
+;   Audio File Decoder Section
+;
+;==============================================================================
+;
+    #define AUDIO_DECODE_CODE_BASE  AUDIO_EQ_CODE_END
+    ;---------------------------------------------------------------
+    ;Mp3 Decode
+    MP3_DECODE_CODE (AUDIO_DECODE_CODE_BASE) OVERLAY
+    {
+        *(Mp3InitCode)
+        *(Mp3Code)
+        *(Mp3DecDataHL)
+        mp3_rom_tbl.o
+    }
+    MP3_DECODE_CODE_END (ImageLimit(MP3_DECODE_CODE)) OVERLAY {}
+    #define MP3_DECODE_CODE_MAX (ImageLimit(MP3_DECODE_CODE))
+
+    ;--------------------------------------------------------------
+    ;Wma Decode
+    WMA_COMMON_CODE(AUDIO_DECODE_CODE_BASE) OVERLAY
+    {
+        *(WmaCommonCode)
+        pwma.o(+RO)
+        wmaudio.o(+RO)
+        drmpd.o(+RO)
+    }
+    WMA_OPEN_CODEC_CODE (ImageLimit(WMA_COMMON_CODE)) OVERLAY
+    {
+        *(WmaOpenCodecCode)
+        msaudiostdpro.o(+RO)
+    }
+    WMA_DATA_16Ob_CODE (ImageLimit(WMA_COMMON_CODE)) OVERLAY
+    {
+    }
+    WMA_DATA_44Qb_CODE (ImageLimit(WMA_COMMON_CODE)) OVERLAY
+    {
+    }
+    WMA_DATA_44Ob_CODE (ImageLimit(WMA_COMMON_CODE)) OVERLAY
+    {
+    }
+    WMA_HIGH_LOW_COMMON_CODE (ImageLimit(WMA_COMMON_CODE)) OVERLAY
+    {
+        *(WmaHighLowCommonCode)
+    }
+    WMA_HIGH_RATE_CODE (ImageLimit(WMA_HIGH_LOW_COMMON_CODE)) OVERLAY
+    {
+        *(WmaHighRateCode)
+    }
+    WMA_HIGH_RATE_CODE_END (ImageLimit(WMA_HIGH_RATE_CODE)) OVERLAY {}
+    ScatterAssert(ImageLimit(WMA_HIGH_RATE_CODE) < (SYS_CODE_BASE + SYS_CODE_SIZE))
+
+    WMA_LOW_RATE_CODE (ImageLimit(WMA_HIGH_LOW_COMMON_CODE)) OVERLAY
+    {
+        *(WmaLowRateCode)
+    }
+    WMA_LOW_RATE_CODE_END  (ImageLimit(WMA_LOW_RATE_CODE))  OVERLAY {}
+    #define WMA_DECODE_CODE_MAX ((ImageLimit(WMA_LOW_RATE_CODE) > MP3_DECODE_CODE_MAX) ? ImageLimit(WMA_LOW_RATE_CODE) : MP3_DECODE_CODE_MAX)
+
+    ;---------------------------------------------------------------
+    ;WavDecode
+    WAV_DECODE_CODE (AUDIO_DECODE_CODE_BASE) OVERLAY
+    {
+        *(WavDecInitCode)
+        *(WavDecCode)
+    }
+    WAV_DECODE_CODE_END (ImageLimit(WAV_DECODE_CODE)) OVERLAY {}
+    #define WAV_DECODE_CODE_MAX ((ImageLimit(WAV_DECODE_CODE) > WMA_DECODE_CODE_MAX) ? ImageLimit(WAV_DECODE_CODE) : WMA_DECODE_CODE_MAX)
+
+    ;---------------------------------------------------------------
+    ;FlacDecode
+    FLAC_DECODE_CODE (AUDIO_DECODE_CODE_BASE) OVERLAY
+    {
+        *(FlacDecCode)
+        flac_stream_decoder.o(+RO)
+    }
+    FLAC_DECODE_CODE_END (ImageLimit(FLAC_DECODE_CODE)) OVERLAY {}
+    #define FLAC_DECODE_CODE_MAX ((ImageLimit(FLAC_DECODE_CODE) > WAV_DECODE_CODE_MAX) ? ImageLimit(FLAC_DECODE_CODE) : WAV_DECODE_CODE_MAX)
+
+    ;---------------------------------------------------------------
+    ;APEDecode
+    APE_DECODE_CODE (AUDIO_DECODE_CODE_BASE) OVERLAY                ;APE Decode Code
+    {
+        *(ApeDecCode)
+    }
+    APE_DECODE_CODE_END (ImageLimit(APE_DECODE_CODE)) OVERLAY {}
+    #define APE_DECODE_CODE_MAX ((ImageLimit(APE_DECODE_CODE) > FLAC_DECODE_CODE_MAX) ? ImageLimit(APE_DECODE_CODE) : FLAC_DECODE_CODE_MAX)
+    #define AUDIO_DECODE_CODE_MAX APE_DECODE_CODE_MAX
+
+;
+;==============================================================================
+;
+;   FM/Record Control Section
+;
+;==============================================================================
+;
+    ;Radio Control
+    FM_CONTROL_CODE (UI_CODE_MAX) OVERLAY
+    {
+        *(FmControlCode )
+    }
+
+    //FM Radio Driver1
+    FM_DRIVER1_CODE (ImageLimit(FM_CONTROL_CODE)) OVERLAY
+    {
+        *(Qn8035DriverCode)
+        hw_qn8035.o(+RO)
+    }
+
+    //FM Radio Driver1
+    FM_DRIVER2_CODE (ImageLimit(FM_CONTROL_CODE)) OVERLAY
+    {
+        *(Fm5807DriverCode)
+    }
+    #define RADIO_DRIVE_CODE_MAX  ((ImageLimit(FM_DRIVER1_CODE) > ImageLimit(FM_DRIVER2_CODE)) ? ImageLimit(FM_DRIVER1_CODE) : ImageLimit(FM_DRIVER2_CODE))
+    FM_DRIVER_CODE_END (RADIO_DRIVE_CODE_MAX) OVERLAY {}
+
+    ;--------------------------------------------------------------
+    ;Record Control
+    RECORD_CONTROL_CODE (RADIO_DRIVE_CODE_MAX) OVERLAY
+    {
+        *(RecordControlCode)
+    }
+
+    ENCODE_MSADPCM_CODE(ImageLimit(RECORD_CONTROL_CODE)) OVERLAY
+    {
+        *(EncodeMsadpcmCode)
+    }
+    RECORD_CODE_END (ImageLimit(ENCODE_MSADPCM_CODE)) OVERLAY {}
+    #define RECORD_CODE_MAX (ImageLimit(ENCODE_MSADPCM_CODE))
+;
+;
+;==============================================================================
+;
+;   Video/Image Section
+;
+;==============================================================================
+;
+    #define VIDEO_CODE_BASE LCD_DRIVER_CODE_MAX
+
+    ;--------------------------------------------------------------
+    ;Video
+    VIDEOWIN_CODE (VIDEO_CODE_BASE) OVERLAY
+    {
+        *(VideoWinCode)
+    }
+
+    VIDEO_CONTROL_CODE (ImageLimit(VIDEOWIN_CODE)) OVERLAY
+    {
+        *(VideoControlCode )
+    }
+
+    MP2_DECODE_CODE (ImageLimit(VIDEO_CONTROL_CODE)) OVERLAY
+    {
+        *(Mp2Code)
+    }
+    AVI_DECODE_CODE (ImageLimit(MP2_DECODE_CODE)) OVERLAY
+    {
+        *(AviDecCode)
+        *(XvidDecCode)
+    }
+    AVI_CODE_END (ImageLimit(AVI_DECODE_CODE)) OVERLAY {}
+    #define AVI_CODE_MAX (ImageLimit(AVI_DECODE_CODE))
+
+    ;--------------------------------------------------------------
+    ;Picture
+    PICWIN_CODE (VIDEO_CODE_BASE) OVERLAY
+    {
+        *(PicWinCode)
+    }
+    IMAGE_CONTROL_CODE (ImageLimit(PICWIN_CODE)) OVERLAY
+    {
+        *(ImageContrlCode)
+        *(ImageCode)
+    }
+    JPG_DECODE_CODE (ImageLimit(IMAGE_CONTROL_CODE)) OVERLAY
+    {
+        *(JpgDecCode)
+    }
+    JPG_DECODE_CODE_END (ImageLimit(JPG_DECODE_CODE)) OVERLAY {}
+
+    BMP_DECODE_CODE (ImageLimit(IMAGE_CONTROL_CODE)) OVERLAY        ;bmp Decode Code
+    {
+        *(BmpDecCode)
+        BMPDEC.o(+RO)
+    }
+    BMP_DECODE_CODE_END (ImageLimit(BMP_DECODE_CODE)) OVERLAY {}
+
+    #define IMAGE_CODE_END   ((ImageLimit(JPG_DECODE_CODE) > ImageLimit(BMP_DECODE_CODE)) ? ImageLimit(JPG_DECODE_CODE) : ImageLimit(BMP_DECODE_CODE))
+    #define IMAGE_CODE_MAX   IMAGE_CODE_END
+
+;
+;==============================================================================
+;
+;   USB Section
+;
+;==============================================================================
+;
+    ;USB MSC
+    USBMSC_CODE (UI_CODE_MAX) OVERLAY
+    {
+        *(UsbMSCCode)
+    }
+    USBMSC_CODE_END (ImageLimit(USBMSC_CODE)) OVERLAY {}
+    #define USBMSC_CODE_MAX  (ImageLimit(USBMSC_CODE))
+
+    ;USB Audio
+    USBAUDIO_CODE (AUDIO_EQ_CODE_END) OVERLAY
+    {
+        *(UsbAudioCode)
+        usbaudio.o(+RO)
+        usb20audioproc.o(+RO)
+    }
+    USBAUDIO_CODE_END (ImageLimit(USBAUDIO_CODE)) OVERLAY {}
+    ScatterAssert(ImageLimit(USBMSC_CODE) < (SYS_CODE_BASE + SYS_CODE_SIZE))
+
+    ;USB Serial
+    USB_SERIAL_CODE (UI_CODE_MAX) OVERLAY
+    {
+    }
+    USB_SERIAL_CODE_END (ImageLimit(USB_SERIAL_CODE)) OVERLAY {}
+
+    #define USB_DEV_CODE_END2 (USBMSC_CODE_MAX > ImageLimit(USBAUDIO_CODE) ? USBMSC_CODE_MAX : ImageLimit(USBAUDIO_CODE))
+    #define USB_DEV_CODE_END  (USB_DEV_CODE_END2 > ImageLimit(USB_SERIAL_CODE)? USB_DEV_CODE_END2 : ImageLimit(USB_SERIAL_CODE))
+;
+;==============================================================================
+;
+;   Bluetooth Section
+;
+;==============================================================================
+;
+    ;---------------------------------------------------------------
+    ;A2DP section
+    ;Sbc Decode
+    ;SBC_DECODE_CODE (AUDIO_DECODE_CODE_BASE) OVERLAY
+    SBC_DECODE_CODE (AUDIO_EQ_CODE_END) OVERLAY
+    {
+        *(SbcDecCode)
+        *(SSRCCode)
+    }
+    ;AacDecode
+    ;AAC_DECODE_CODE (AUDIO_DECODE_CODE_BASE) OVERLAY
+    AAC_DECODE_CODE (AUDIO_EQ_CODE_END) OVERLAY
+    {
+        *(AacDecCode)
+        movfile.o(+RO)
+    }
+    #define BT_AUDIO_CODE_MAX ((ImageLimit(SBC_DECODE_CODE) > ImageLimit(AAC_DECODE_CODE)) ? ImageLimit(SBC_DECODE_CODE) : ImageLimit(AAC_DECODE_CODE))
+
+    ;A2DP
+    BT_AUDIO_CODE (BT_AUDIO_CODE_MAX) OVERLAY
+    {
+        *(BlueToothAudioCode)
+    }
+    #define BT_AUDIO_CODE_END  ImageLimit(BT_AUDIO_CODE)
+
+    ;---------------------------------------------------------------
+    ;HFP section
+    ;Aec algorithm
+    AEC_ALG_CODE (AUDIO_CONTROL_CODE_END) OVERLAY
+    {
+        *(AecAlgCode)
+    }
+    ;HFP
+    BT_PHONE_CODE (ImageLimit(AEC_ALG_CODE)) OVERLAY
+    {
+        *(BlueToothPhoneCode)
+    }
+    #define BT_HFP_CODE_MAX  ((ImageLimit(BT_PHONE_CODE) > ImageLimit(BT_AUDIO_CODE)) ? ImageLimit(BT_PHONE_CODE) : ImageLimit(BT_AUDIO_CODE))
+
+    ;---------------------------------------------------------------
+    ;Voice notify
+    BT_VOICENOTIFY_CODE (AUDIO_CONTROL_CODE_END) OVERLAY
+    {
+        *(BlueToothVoiceNotifyCode)
+    }
+    #define BT_NOTIFY_CODE_MAX  ((ImageLimit(BT_VOICENOTIFY_CODE) > BT_HFP_CODE_MAX) ? ImageLimit(BT_VOICENOTIFY_CODE) : BT_HFP_CODE_MAX)
+
+    ;---------------------------------------------------------------
+    ;LwBT
+    LWBT_CODE (BT_NOTIFY_CODE_MAX) OVERLAY                    ;Mp3 Decode Code
+    {
+        *(LwbtCode)
+        hsp_hfp.o(+RO)
+    }
+    ; bluetooth
+    BTCONTROL_CODE (ImageLimit(LWBT_CODE)) OVERLAY
+    {
+        *(BlueToothControlCode)
+        bluetoothcontrol.o(+RO)
+    }
+    BTCONTROL_CODE_END (ImageLimit(BTCONTROL_CODE)) OVERLAY {}
+    ScatterAssert(ImageLimit(BTCONTROL_CODE) < (SYS_CODE_BASE + SYS_CODE_SIZE))
+
+    ;---------------------------------------------------------------
+    ;Bluetooth Chip script file data
+    BT_INIT_SCRIPT_CODE (ImageLimit(LWBT_CODE)) OVERLAY
+    {
+        *(LwbtInitScriptCode)
+    }
+
+    ;---------------------------------------------------------------
+    ;Voice notify data
+    VOCIE_NOTIFY_CALL_COMING_CODE (ImageLimit(LWBT_CODE)) OVERLAY
+    {
+        *(VocieCallComing)
+    }
+    VOCIE_NOTIFY_WAIT_PAIR (ImageLimit(LWBT_CODE)) OVERLAY
+    {
+        *(VocieWaitPair)
+    }
+    VOCIE_NOTIFY_PAIRED (ImageLimit(LWBT_CODE)) OVERLAY
+    {
+        *(VocieParied)
+    }
+
+;==============================================================================
+;
+;   MediaLib Section
+;
+;==============================================================================
+;
+    ;--------------------------------------------------------------
+    ;file information search and save
+    FILE_INFO_SAVE_CODE (UI_CODE_MAX)   OVERLAY
+    {
+        *(FileInfoSaveCode)
+    }
+    FILE_INFO_SAVE_CODE_END (ImageLimit(FILE_INFO_SAVE_CODE))   OVERLAY {}
+    #define FILE_INFO_SAVE_CODE_MAX (ImageLimit(FILE_INFO_SAVE_CODE))
+
+    ;
+    ;--------------------------------------------------------------
+    ;file information sort
+    FILE_INFO_SORT_CODE (UI_CODE_MAX)   OVERLAY
+    {
+        *(FileInfoSortCode)
+    }
+    FILE_INFO_SORT_CODE_END (ImageLimit(FILE_INFO_SORT_CODE))   OVERLAY {}
+    #define FILE_INFO_SORT_CODE_MAX ((ImageLimit(FILE_INFO_SORT_CODE) > FILE_INFO_SAVE_CODE_MAX) ? ImageLimit(FILE_INFO_SORT_CODE) : FILE_INFO_SAVE_CODE_MAX)
+
+    ;--------------------------------------------------------------
+    ;favorite
+    FAVORESET_CODE (UI_CODE_MAX)   OVERLAY
+    {
+        *(FavoResetCode)
+    }
+    FAVORESET_CODE_END (ImageLimit(FAVORESET_CODE))   OVERLAY {}
+    #define FAVORESET_CODE_MAX ((ImageLimit(FAVORESET_CODE) > FILE_INFO_SORT_CODE_MAX) ? ImageLimit(FAVORESET_CODE) : FILE_INFO_SORT_CODE_MAX)
+
+    ;---------------------------------------------------------------------
+    ;ID3 JPG
+    AUDIO_ID3JPEG_CODE (AUDIO_CONTROL_CODE_END) OVERLAY
+    {
+    	*(Id3JpgCode)
+    	album_jpgdec_decompress.o(+RO)
+    }
+    AUDIO_ID3JPEG_CODE_END (ImageLimit(AUDIO_ID3JPEG_CODE))   OVERLAY {}
+    #define AUDIO_ID3JPEG_CODE_MAX ((ImageLimit(AUDIO_ID3JPEG_CODE) > FAVORESET_CODE_MAX) ? ImageLimit(AUDIO_ID3JPEG_CODE) : FAVORESET_CODE_MAX)
+
+    ;---------------------------------------------------------------------
+    ; ID3
+    AUDIO_ID3_CODE (AUDIO_ID3JPEG_CODE_MAX) OVERLAY
+    {
+        *(Id3Code)
+        *(WmaId3Code)
+    }
+    #define AUDIO_ID3_CODE_MAX (ImageLimit(AUDIO_ID3_CODE))
+
+;==============================================================================
+;
+;   Audio File Section
+;
+;==============================================================================
+;
+    ; Audio File Decode
+
+    #define AUDIO_FILE_CODE_BASE1 ((AUDIO_ID3_CODE_MAX > AUDIO_DECODE_CODE_MAX) ? AUDIO_ID3_CODE_MAX : AUDIO_DECODE_CODE_MAX)
+    #define AUDIO_FILE_CODE_BASE  ((AUDIO_FILE_CODE_BASE1 > BT_AUDIO_CODE_MAX) ? AUDIO_FILE_CODE_BASE1 : BT_AUDIO_CODE_MAX)
+
+    AUDIO_FILE_CODE  (AUDIO_FILE_CODE_BASE) OVERLAY
+    {
+        *(AudioFileCode)
+        audiofile.o(+RO)
+    }
+    #define AUDIO_FILE_CODE_MAX (ImageLimit(AUDIO_FILE_CODE))
+
+;==============================================================================
+;
+;   SDMMC / USBHOST Section
+;
+;==============================================================================
+;
+;   After Video,Picture,MSC,Record,ID3,AudioFile
+
+    #define MEMORY_DEV_CODE_BASE3   ((AVI_CODE_MAX > IMAGE_CODE_MAX) ? AVI_CODE_MAX : IMAGE_CODE_MAX)
+    #define MEMORY_DEV_CODE_BASE2   ((USB_DEV_CODE_END > RECORD_CODE_MAX) ? USB_DEV_CODE_END : RECORD_CODE_MAX)
+    #define MEMORY_DEV_CODE_BASE1   ((AUDIO_ID3_CODE_MAX > AUDIO_FILE_CODE_MAX) ? AUDIO_ID3_CODE_MAX : AUDIO_FILE_CODE_MAX)
+
+    #define MEMORY_DEV_CODE_BASE0   ((MEMORY_DEV_CODE_BASE3 > MEMORY_DEV_CODE_BASE2) ? MEMORY_DEV_CODE_BASE3 : MEMORY_DEV_CODE_BASE2)
+    #define MEMORY_DEV_CODE_BASE5    ((MEMORY_DEV_CODE_BASE1 > MEMORY_DEV_CODE_BASE0) ? MEMORY_DEV_CODE_BASE1 : MEMORY_DEV_CODE_BASE0)
+
+    #define MEMORY_DEV_CODE_BASE    (MEMORY_DEV_CODE_BASE5 > ImageLimit(BTCONTROL_CODE)? MEMORY_DEV_CODE_BASE5 : ImageLimit(BTCONTROL_CODE))
+    ;--------------------------------------------------------------
+    ;Memory overlay
+    SD_MMC_CODE (MEMORY_DEV_CODE_BASE) OVERLAY
+    {
+        *(SDCode)
+        *(SDInitCode)
+        *(SDWriteCode)
+    }
+    USBCONTROL_CODE(ImageLimit(SD_MMC_CODE)) OVERLAY
+    {
+        *(UsbControlCode)
+    }
+    ScatterAssert(ImageLimit(USBCONTROL_CODE) < (SYS_CODE_BASE + SYS_CODE_SIZE))
+
+    USBHOST_CODE(MEMORY_DEV_CODE_BASE) OVERLAY
+    {
+       *(UsbHostCode)
+       hcd.o(+RO)
+       msc.o(+RO)
+    }
+
+    #define MEMORY_DEV_CODE_END  ((ImageLimit(SD_MMC_CODE)>ImageLimit(USBHOST_CODE))?ImageLimit(SD_MMC_CODE):ImageLimit(USBHOST_CODE))
+    MEMORY_DEV_CODE_MAX (MEMORY_DEV_CODE_END) OVERLAY {}
+    ScatterAssert(ImageLimit(USBHOST_CODE) < (SYS_CODE_BASE + SYS_CODE_SIZE))
+	FS_FIRMWARE  0X31000000
+	{
+		*( fs_firmware)
+	}
+}
+
+;*******************************************************************************
+
+
